@@ -1,0 +1,17 @@
+html
+	head
+		title Easy zachet
+
+		meta(name='viewport' content='width-device-width, initial-scale=1.0')
+		
+		link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css')
+		link(href='https://fonts.googleapis.com/css?family=Roboto+Mono' rel='stylesheet') 
+		link(href='css/style.css' rel='stylesheet')
+	body
+		center
+			p Хей, вводи свою тему и чутка подожди, пока мы подберем кое-что для тебя
+
+			form(action='/search' method='get')
+				input(type='text' placeholder='your topic' name='topic' autofocus autocomplete='off')
+				button(type=submit)
+					i(class='fa fa-search')
