@@ -22,20 +22,23 @@ app.get('/', (req, res) => res.status(200).redirect('/home'))
 app.get('/home', (req, res) => res.render('index'))
 
 app.get('/search', (req, res) => {
-		wiki({ apiUrl: 'http://ru.wikipedia.org/w/api.php' }).search(req.query.topic, 10)
-			.then(data => {
-				if (data.results[0])
-					res.render('list', {
-						array: data.results,
-						text: 'Выбирай что по вкусу, и через пару секунд мы сделаем тебе доклад '
-					})
-				else
-					res.render('list', {
-						array: data.results,
-						text: 'Котя, по твоей теме мы ничего не нашли. Попробуй еще раз '
-					})
-			})
-			.catch(e => logger.error(e))
+
+	wiki({ apiUrl: `http://${req.query.lng}.wikipedia.org/w/api.php` }).search(req.query.topic, 10)
+		.then(data => {
+			if (data.results[0])
+				res.render('list', {
+					array: data.results,
+					text: 'Выбирай что по вкусу, и через пару секунд мы сделаем тебе доклад ',
+					lng: req.query.lng
+				})
+			else
+				res.render('list', {
+					array: data.results,
+					text: 'Котя, по твоей теме мы ничего не нашли. Попробуй еще раз ',
+					lng: req.query.lng
+				})
+		})
+		.catch(e => logger.error(e))
 })
 
 app.get('/essay', (request, response) => {
@@ -52,13 +55,20 @@ app.get('/essay', (request, response) => {
 			save: { filePath: './essay.docx' }
 		}
 
-	wiki({ apiUrl: 'http://ru.wikipedia.org/w/api.php' }).page(title)
+	wiki({ apiUrl: `http://${request.query.lng}.wikipedia.org/w/api.php` }).page(title)
 		.then(page => page.content())
 		.then(res => {
-			let m = res.match('== См. также ==')
-			if (m) res = res.slice(0, m.index)
-			m = res.match('== Примечания ==')
-			if (m) res = res.slice(0, m.index)
+			if (request.query.lng == 'ru') {
+				let m = res.match('== См. также ==')
+				if (m) res = res.slice(0, m.index)
+				m = res.match('== Примечания ==')
+				if (m) res = res.slice(0, m.index)
+			} else {
+				let m = res.match('== See also ==')
+				if (m) res = res.slice(0, m.index)
+				m = res.match('== References ==')
+				if (m) res = res.slice(0, m.index)
+			}
 			res = res.replace(/={3,} /g, '== == ')
 			res = res.replace(/ ={3,}/g, ' == ==')
 
@@ -84,4 +94,4 @@ app.use((err, req, res, next) => {
 })
 
 
-server.listen(PORT, () => logger.info('Server is running on port ' + PORT))
+server.listen(PORT, () => logger.info(`Server is running on port ${PORT}`))
